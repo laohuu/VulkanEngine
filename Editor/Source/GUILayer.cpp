@@ -2,10 +2,13 @@
 
 #include <glm/gtc/type_ptr.hpp>
 #include <imgui.h>
+#include "vulkan/vulkan.h"
 
 namespace Engine
 {
-    GUILayer::GUILayer() : Layer("GUILayer") {}
+    GUILayer::GUILayer() : Layer("GUILayer") {
+
+    }
 
     void GUILayer::OnUpdate(float ts) {}
 

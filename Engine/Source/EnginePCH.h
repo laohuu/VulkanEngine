@@ -1,14 +1,19 @@
 #ifndef ENGINE_PCH_H
 #define ENGINE_PCH_H
 
-#include <algorithm>
 #include <cstdint>
+
+#include <algorithm>
+#include <filesystem>
+#include <fstream>
 #include <functional>
 #include <iostream>
 #include <memory>
 #include <utility>
 
 #include <array>
+
+#include <map>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
