@@ -8,6 +8,5 @@
 
 #include "Core/Input.h"
 #include "Core/KeyCodes.h"
-#include "Core/MouseCodes.h"
 
 #endif // ENGINE_ENGINE_H

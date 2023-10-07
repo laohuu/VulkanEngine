@@ -1,16 +1,14 @@
 #include "GUILayer.h"
 
+#include "vulkan/vulkan.h"
 #include <glm/gtc/type_ptr.hpp>
 #include <imgui.h>
-#include "vulkan/vulkan.h"
 
 namespace Engine
 {
-    GUILayer::GUILayer() : Layer("GUILayer") {
+    GUILayer::GUILayer() : Layer("GUILayer") {}
 
-    }
-
-    void GUILayer::OnUpdate(float ts) {}
+    void GUILayer::OnUpdate(Timestep ts) {}
 
     void GUILayer::OnImGuiRender()
     {

@@ -1,8 +1,15 @@
 #ifndef ENGINE_APPLICATION_H
 #define ENGINE_APPLICATION_H
 
+#include "Core/Base.h"
+#include "Core/LayerStack.h"
+#include "Core/Timer.h"
+#include "Core/Timestep.h"
+#include "Core/Window.h"
+
+#include "Core/Events/ApplicationEvent.h"
+
 #include "ImGui/ImGuiLayer.h"
-#include "LayerStack.h"
 
 #include <GLFW/glfw3.h>
 
@@ -19,6 +26,8 @@ namespace Engine
 
     class Application
     {
+        using EventCallbackFn = std::function<void(Event&)>;
+
     public:
         Application(const ApplicationSpecification& specification);
         virtual ~Application();
@@ -31,6 +40,8 @@ namespace Engine
 
         void PushLayer(Layer* layer);
         void PushOverlay(Layer* layer);
+
+        virtual void OnEvent(Event& event);
 
         ImGuiLayer* GetImGuiLayer() { return m_ImGuiLayer; }
 
@@ -45,10 +56,17 @@ namespace Engine
 
         void ExecuteMainThreadQueue();
 
+        bool OnWindowResize(WindowResizeEvent& e);
+        bool OnWindowMinimize(WindowMinimizeEvent& e);
+        bool OnWindowClose(WindowCloseEvent& e);
+
     private:
+        std::unique_ptr<Window>  m_Window;
         ApplicationSpecification m_Specification;
         GLFWwindow*              m_WindowHandle = nullptr;
         ImGuiLayer*              m_ImGuiLayer;
+        Timestep                 m_Frametime;
+        Timestep                 m_TimeStep;
         bool                     m_Running   = true;
         bool                     m_Minimized = false;
         LayerStack               m_LayerStack;
@@ -56,6 +74,8 @@ namespace Engine
 
         std::vector<std::function<void()>> m_MainThreadQueue;
         std::mutex                         m_MainThreadQueueMutex;
+
+        std::vector<EventCallbackFn> m_EventCallbacks;
 
     private:
         static Application* s_Instance;

@@ -3,8 +3,6 @@
 
 #include <Engine.h>
 
-#include "Core/Image.h"
-
 namespace Engine
 {
     class GUILayer : public Layer
@@ -13,7 +11,7 @@ namespace Engine
         GUILayer();
         ~GUILayer() override = default;
 
-        void OnUpdate(float ts) override;
+        void OnUpdate(Timestep ts) override;
         void OnImGuiRender() override;
     };
 } // namespace Engine

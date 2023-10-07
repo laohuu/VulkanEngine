@@ -1,5 +1,7 @@
 #include "Application.h"
 
+#include "Input.h"
+
 static void glfw_error_callback(int error, const char* description)
 {
     fprintf(stderr, "GLFW Error %d: %s\n", error, description);
@@ -12,6 +14,25 @@ namespace Engine
     Application::Application(const ApplicationSpecification& specification) : m_Specification(specification)
     {
         s_Instance = this;
+
+        //        WindowSpecification windowSpec;
+        //        windowSpec.Title      = specification.Name;
+        //        windowSpec.Width      = specification.Width;
+        //        windowSpec.Height     = specification.Height;
+        //        windowSpec.Decorated  = false;
+        //        windowSpec.Fullscreen = false;
+        //        windowSpec.VSync      = true;
+        //        m_Window              = std::unique_ptr<Window>(Window::Create(windowSpec));
+        //        m_Window->Init();
+        //        m_Window->SetEventCallback([this](Event& e) { OnEvent(e); });
+
+        // Init renderer and execute command queue to compile all shaders
+        //        Renderer::Init();
+
+        //        if (false)
+        //            m_Window->Maximize();
+        //        else
+        //            m_Window->CenterWindow();
 
         Init();
 
@@ -81,7 +102,8 @@ namespace Engine
         while (!glfwWindowShouldClose(m_WindowHandle) && m_Running)
         {
             float time      = GetTime();
-            float timestep  = time - m_LastFrameTime;
+            m_Frametime     = time - m_LastFrameTime;
+            m_TimeStep      = glm::min<float>(m_Frametime, 0.0333f);
             m_LastFrameTime = time;
 
             ExecuteMainThreadQueue();
@@ -90,7 +112,7 @@ namespace Engine
             {
                 {
                     for (Layer* layer : m_LayerStack)
-                        layer->OnUpdate(timestep);
+                        layer->OnUpdate(m_TimeStep);
                 }
 
                 m_ImGuiLayer->Begin();
@@ -101,6 +123,66 @@ namespace Engine
                 m_ImGuiLayer->End();
             }
         }
+    }
+
+    void Application::OnEvent(Event& event)
+    {
+        EventDispatcher dispatcher(event);
+        dispatcher.Dispatch<WindowResizeEvent>([this](WindowResizeEvent& e) { return OnWindowResize(e); });
+        dispatcher.Dispatch<WindowMinimizeEvent>([this](WindowMinimizeEvent& e) { return OnWindowMinimize(e); });
+        dispatcher.Dispatch<WindowCloseEvent>([this](WindowCloseEvent& e) { return OnWindowClose(e); });
+
+        for (auto it = m_LayerStack.end(); it != m_LayerStack.begin();)
+        {
+            (*--it)->OnEvent(event);
+            if (event.Handled)
+                break;
+        }
+
+        if (event.Handled)
+            return;
+
+        // TODO(Peter): Should these callbacks be called BEFORE the layers recieve events?
+        //				We may actually want that since most of these callbacks will be functions REQUIRED in order for
+        // the game 				to work, and if a layer has already handled the event we may end up with problems
+        for (auto& eventCallback : m_EventCallbacks)
+        {
+            eventCallback(event);
+
+            if (event.Handled)
+                break;
+        }
+    }
+
+    bool Application::OnWindowResize(WindowResizeEvent& e)
+    {
+        const uint32_t width = e.GetWidth(), height = e.GetHeight();
+        if (width == 0 || height == 0)
+        {
+            // m_Minimized = true;
+            return false;
+        }
+        // m_Minimized = false;
+
+        auto& window = m_Window;
+        //        Renderer::Submit([&window, width, height]() mutable
+        //                         {
+        //                             window->GetSwapChain().OnResize(width, height);
+        //                         });
+
+        return false;
+    }
+
+    bool Application::OnWindowMinimize(WindowMinimizeEvent& e)
+    {
+        m_Minimized = e.IsMinimized();
+        return false;
+    }
+
+    bool Application::OnWindowClose(WindowCloseEvent& e)
+    {
+        Close();
+        return false; // give other things a chance to react to window close
     }
 
     void Application::ExecuteMainThreadQueue()
