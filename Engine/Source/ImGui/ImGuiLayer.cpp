@@ -414,7 +414,7 @@ namespace Engine
             extensions.push_back(glfw_extensions[i]);
         SetupVulkan(extensions);
 
-        auto window = Application::Get().GetWindow();
+        auto window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
 
         // Create Window Surface
         VkSurfaceKHR surface;
@@ -553,8 +553,9 @@ namespace Engine
         // Resize swap chain?
         if (g_SwapChainRebuild)
         {
-            int width, height;
-            glfwGetFramebufferSize(Application::Get().GetWindow(), &width, &height);
+            int  width, height;
+            auto window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
+            glfwGetFramebufferSize(window, &width, &height);
             if (width > 0 && height > 0)
             {
                 ImGui_ImplVulkan_SetMinImageCount(g_MinImageCount);

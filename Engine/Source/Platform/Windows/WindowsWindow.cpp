@@ -220,14 +220,13 @@ namespace Engine
             m_Data.Height = height;
         }
 
-        // Set icon
-        {
-            GLFWimage icon;
-            int       channels;
-            icon.pixels = stbi_load("Resources/Editor/H_logo_square.png", &icon.width, &icon.height, &channels, 4);
-            glfwSetWindowIcon(m_Window, 1, &icon);
-            stbi_image_free(icon.pixels);
-        }
+        //        // Set icon
+        //        {
+        //            GLFWimage icon;
+        //            int       channels;
+        //            icon.pixels = stbi_load("Resources/Editor/H_logo_square.png", &icon.width, &icon.height,
+        //            &channels, 4); glfwSetWindowIcon(m_Window, 1, &icon); stbi_image_free(icon.pixels);
+        //        }
     }
 
     void WindowsWindow::Shutdown()

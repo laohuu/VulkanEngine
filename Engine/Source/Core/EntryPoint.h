@@ -4,12 +4,16 @@
 #include "Application.h"
 
 extern Engine::Application* Engine::CreateApplication(int argc, char** argv);
+bool                        g_ApplicationRunning = true;
 
 int main(int argc, char** argv)
 {
-    auto app = Engine::CreateApplication(argc, argv);
-    app->Run();
-    delete app;
+    while (g_ApplicationRunning)
+    {
+        auto app = Engine::CreateApplication(argc, argv);
+        app->Run();
+        delete app;
+    }
     return 0;
 }
 

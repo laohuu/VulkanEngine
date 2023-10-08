@@ -1,11 +1,9 @@
 #include "Application.h"
 
 #include "Input.h"
+#include "Renderer/Renderer.h"
 
-static void glfw_error_callback(int error, const char* description)
-{
-    fprintf(stderr, "GLFW Error %d: %s\n", error, description);
-}
+extern bool g_ApplicationRunning;
 
 namespace Engine
 {
@@ -15,66 +13,47 @@ namespace Engine
     {
         s_Instance = this;
 
-        //        WindowSpecification windowSpec;
-        //        windowSpec.Title      = specification.Name;
-        //        windowSpec.Width      = specification.Width;
-        //        windowSpec.Height     = specification.Height;
-        //        windowSpec.Decorated  = false;
-        //        windowSpec.Fullscreen = false;
-        //        windowSpec.VSync      = true;
-        //        m_Window              = std::unique_ptr<Window>(Window::Create(windowSpec));
-        //        m_Window->Init();
-        //        m_Window->SetEventCallback([this](Event& e) { OnEvent(e); });
+        WindowSpecification windowSpec;
+        windowSpec.Title      = specification.Name;
+        windowSpec.Width      = specification.Width;
+        windowSpec.Height     = specification.Height;
+        windowSpec.Decorated  = specification.WindowDecorated;
+        windowSpec.Fullscreen = specification.Fullscreen;
+        windowSpec.VSync      = specification.VSync;
+        m_Window              = std::unique_ptr<Window>(Window::Create(windowSpec));
+        m_Window->Init();
+        m_Window->SetEventCallback([this](Event& e) { OnEvent(e); });
 
-        // Init renderer and execute command queue to compile all shaders
+        //         Init renderer and execute command queue to compile all shaders
         //        Renderer::Init();
 
-        //        if (false)
-        //            m_Window->Maximize();
-        //        else
-        //            m_Window->CenterWindow();
+        if (specification.StartMaximized)
+            m_Window->Maximize();
+        else
+            m_Window->CenterWindow();
+        m_Window->SetResizable(specification.Resizable);
 
-        Init();
-
-        m_ImGuiLayer = new ImGuiLayer();
-        PushOverlay(m_ImGuiLayer);
+        if (m_Specification.EnableImGui)
+        {
+            m_ImGuiLayer = new ImGuiLayer();
+            PushOverlay(m_ImGuiLayer);
+        }
     }
 
     Application::~Application()
     {
-        Shutdown();
-        s_Instance = nullptr;
-    }
+        m_Window->SetEventCallback([](Event& e) {});
 
-    void Application::Init()
-    {
-        // Setup GLFW window
-        glfwSetErrorCallback(glfw_error_callback);
-        if (!glfwInit())
+        for (Layer* layer : m_LayerStack)
         {
-            std::cerr << "Could not initalize GLFW!\n";
-            return;
+            layer->OnDetach();
+            delete layer;
         }
 
-        glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-        m_WindowHandle = glfwCreateWindow(
-            m_Specification.Width, m_Specification.Height, m_Specification.Name.c_str(), nullptr, nullptr);
+        Renderer::Shutdown();
+
+        s_Instance = nullptr;
     }
-
-    void Application::Shutdown()
-    {
-        for (auto& layer : m_LayerStack)
-            layer->OnDetach();
-
-        m_LayerStack.Clear();
-
-        glfwDestroyWindow(m_WindowHandle);
-        glfwTerminate();
-    }
-
-    void Application::Close() { m_Running = false; }
-
-    float Application::GetTime() { return (float)glfwGetTime(); }
 
     void Application::PushLayer(Layer* layer)
     {
@@ -88,42 +67,68 @@ namespace Engine
         layer->OnAttach();
     }
 
-    void Application::SubmitToMainThread(const std::function<void()>& function)
+    void Application::PopLayer(Layer* layer)
     {
-        std::scoped_lock<std::mutex> lock(m_MainThreadQueueMutex);
+        m_LayerStack.PopLayer(layer);
+        layer->OnDetach();
+    }
 
-        m_MainThreadQueue.emplace_back(function);
+    void Application::PopOverlay(Layer* layer)
+    {
+        m_LayerStack.PopOverlay(layer);
+        layer->OnDetach();
+    }
+
+    void Application::RenderImGui()
+    {
+        m_ImGuiLayer->Begin();
+
+        for (int i = 0; i < m_LayerStack.Size(); i++)
+            m_LayerStack[i]->OnImGuiRender();
     }
 
     void Application::Run()
     {
-        m_Running = true;
+        OnInit();
 
-        while (!glfwWindowShouldClose(m_WindowHandle) && m_Running)
+        while (m_Running)
         {
-            float time      = GetTime();
-            m_Frametime     = time - m_LastFrameTime;
-            m_TimeStep      = glm::min<float>(m_Frametime, 0.0333f);
-            m_LastFrameTime = time;
-
-            ExecuteMainThreadQueue();
-
             if (!m_Minimized)
             {
+                //                m_Window->GetSwapChain().BeginFrame();
+
+                Renderer::BeginFrame();
                 {
                     for (Layer* layer : m_LayerStack)
                         layer->OnUpdate(m_TimeStep);
                 }
 
-                m_ImGuiLayer->Begin();
+                if (m_Specification.EnableImGui)
                 {
-                    for (Layer* layer : m_LayerStack)
-                        layer->OnImGuiRender();
+                    RenderImGui();
+                    m_ImGuiLayer->End();
                 }
-                m_ImGuiLayer->End();
+                Renderer::EndFrame();
+
+                m_Window->SwapBuffers();
             }
+
+            float time      = GetTime();
+            m_Frametime     = time - m_LastFrameTime;
+            m_TimeStep      = glm::min<float>(m_Frametime, 0.0333f);
+            m_LastFrameTime = time;
         }
+        OnShutdown();
     }
+
+    void Application::Close() { m_Running = false; }
+    void Application::OnShutdown()
+    {
+        m_EventCallbacks.clear();
+        g_ApplicationRunning = false;
+    }
+
+    float Application::GetTime() const { return (float)glfwGetTime(); }
 
     void Application::OnEvent(Event& event)
     {
@@ -185,13 +190,7 @@ namespace Engine
         return false; // give other things a chance to react to window close
     }
 
-    void Application::ExecuteMainThreadQueue()
-    {
-        std::scoped_lock<std::mutex> lock(m_MainThreadQueueMutex);
+    const char* Application::GetConfigurationName() { return ""; }
 
-        for (auto& func : m_MainThreadQueue)
-            func();
-
-        m_MainThreadQueue.clear();
-    }
+    const char* Application::GetPlatformName() { return ""; }
 } // namespace Engine

@@ -8,7 +8,7 @@ namespace Engine
     class LayerStack
     {
     public:
-        LayerStack() = default;
+        LayerStack();
         ~LayerStack();
 
         void PushLayer(Layer* layer);
@@ -16,16 +16,14 @@ namespace Engine
         void PopLayer(Layer* layer);
         void PopOverlay(Layer* overlay);
 
-        void Clear();
+        Layer* operator[](size_t index) { return m_Layers[index]; }
 
-        std::vector<Layer*>::iterator               begin() { return m_Layers.begin(); }
-        std::vector<Layer*>::iterator               end() { return m_Layers.end(); }
-        std::vector<Layer*>::reverse_iterator       rbegin() { return m_Layers.rbegin(); }
-        std::vector<Layer*>::reverse_iterator       rend() { return m_Layers.rend(); }
-        std::vector<Layer*>::const_iterator         begin() const { return m_Layers.begin(); }
-        std::vector<Layer*>::const_iterator         end() const { return m_Layers.end(); }
-        std::vector<Layer*>::const_reverse_iterator rbegin() const { return m_Layers.rbegin(); }
-        std::vector<Layer*>::const_reverse_iterator rend() const { return m_Layers.rend(); }
+        const Layer* operator[](size_t index) const { return m_Layers[index]; }
+
+        size_t Size() const { return m_Layers.size(); }
+
+        std::vector<Layer*>::iterator begin() { return m_Layers.begin(); }
+        std::vector<Layer*>::iterator end() { return m_Layers.end(); }
 
     private:
         std::vector<Layer*> m_Layers;
