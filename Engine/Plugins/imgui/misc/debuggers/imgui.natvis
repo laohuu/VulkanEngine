@@ -46,8 +46,8 @@ More information at: https://docs.microsoft.com/en-us/visualstudio/debugger/crea
   <Expand>
     <Item Name="Min">Min</Item>
     <Item Name="Max">Max</Item>
-    <Item Name="[Width]">Max.x - Min.x</Item>
-    <Item Name="[Height]">Max.y - Min.y</Item>
+    <Item Name="[WindowWidth]">Max.x - Min.x</Item>
+    <Item Name="[WindowHeight]">Max.y - Min.y</Item>
   </Expand>
 </Type>
 

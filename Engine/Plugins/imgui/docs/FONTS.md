@@ -137,7 +137,7 @@ io.Fonts->AddFontFromFileTTF("font.ttf", size_pixels, nullptr, io.Fonts->GetGlyp
 // Default + Selection of 2500 Ideographs used by Simplified Chinese
 io.Fonts->AddFontFromFileTTF("font.ttf", size_pixels, nullptr, io.Fonts->GetGlyphRangesChineseSimplifiedCommon());
 
-// Default + Hiragana, Katakana, Half-Width, Selection of 1946 Ideographs
+// Default + Hiragana, Katakana, Half-WindowWidth, Selection of 1946 Ideographs
 io.Fonts->AddFontFromFileTTF("font.ttf", size_pixels, nullptr, io.Fonts->GetGlyphRangesJapanese());
 ```
 See [Using Custom Glyph Ranges](#using-custom-glyph-ranges) section to create your own ranges.
@@ -335,10 +335,10 @@ for (int rect_n = 0; rect_n < IM_ARRAYSIZE(rect_ids); rect_n++)
     if (const ImFontAtlasCustomRect* rect = io.Fonts->GetCustomRectByIndex(rect_id))
     {
         // Fill the custom rectangle with red pixels (in reality you would draw/copy your bitmap data here!)
-        for (int y = 0; y < rect->Height; y++)
+        for (int y = 0; y < rect->WindowHeight; y++)
         {
             ImU32* p = (ImU32*)tex_pixels + (rect->Y + y) * tex_width + (rect->X);
-            for (int x = rect->Width; x > 0; x--)
+            for (int x = rect->WindowWidth; x > 0; x--)
                 *p++ = IM_COL32(255, 0, 0, 255);
         }
     }
@@ -495,7 +495,7 @@ Regular:
 - Programmation fonts http://s9w.github.io/font_compare/
 - Inconsolata http://www.levien.com/type/myfonts/inconsolata.html
 - Adobe Source Code Pro: Monospaced font family for ui & coding environments https://github.com/adobe-fonts/source-code-pro
-- Monospace/Fixed Width Programmer's Fonts http://www.lowing.org/fonts/
+- Monospace/Fixed WindowWidth Programmer's Fonts http://www.lowing.org/fonts/
 
 Or use Arial Unicode or other Unicode fonts provided with Windows for full characters coverage (not sure of their licensing).
 

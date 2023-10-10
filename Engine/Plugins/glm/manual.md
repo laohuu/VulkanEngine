@@ -1358,9 +1358,9 @@ This extension exposes functions to transform scenes into the clip space.
 #include <glm/ext/matrix_clip_space.hpp> // perspective
 #include <glm/trigonometric.hpp> // radians
 
-glm::mat4 computeProjection(float Width, float Height)
+glm::mat4 computeProjection(float WindowWidth, float WindowHeight)
 {
-	return glm::perspective(glm::radians(45.0f), Width / Height, 0.1f, 100.f);
+	return glm::perspective(glm::radians(45.0f), WindowWidth / WindowHeight, 0.1f, 100.f);
 }
 ```
 

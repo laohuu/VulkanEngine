@@ -15,8 +15,8 @@ namespace Engine
 
         WindowSpecification windowSpec;
         windowSpec.Title      = specification.Name;
-        windowSpec.Width      = specification.Width;
-        windowSpec.Height     = specification.Height;
+        windowSpec.Width      = specification.WindowWidth;
+        windowSpec.Height     = specification.WindowHeight;
         windowSpec.Decorated  = specification.WindowDecorated;
         windowSpec.Fullscreen = specification.Fullscreen;
         windowSpec.VSync      = specification.VSync;
@@ -85,6 +85,8 @@ namespace Engine
 
         for (int i = 0; i < m_LayerStack.Size(); i++)
             m_LayerStack[i]->OnImGuiRender();
+
+        m_ImGuiLayer->End();
     }
 
     void Application::Run()
@@ -93,6 +95,7 @@ namespace Engine
 
         while (m_Running)
         {
+            ProcessEvents(); // Poll events when both threads are idle
             if (!m_Minimized)
             {
                 //                m_Window->GetSwapChain().BeginFrame();
@@ -106,14 +109,13 @@ namespace Engine
                 if (m_Specification.EnableImGui)
                 {
                     RenderImGui();
-                    m_ImGuiLayer->End();
                 }
                 Renderer::EndFrame();
 
                 m_Window->SwapBuffers();
             }
 
-            float time      = GetTime();
+            float time      = m_Window->GetTime();
             m_Frametime     = time - m_LastFrameTime;
             m_TimeStep      = glm::min<float>(m_Frametime, 0.0333f);
             m_LastFrameTime = time;
@@ -127,8 +129,6 @@ namespace Engine
         m_EventCallbacks.clear();
         g_ApplicationRunning = false;
     }
-
-    float Application::GetTime() const { return (float)glfwGetTime(); }
 
     void Application::OnEvent(Event& event)
     {
@@ -156,6 +156,24 @@ namespace Engine
 
             if (event.Handled)
                 break;
+        }
+    }
+
+    void Application::ProcessEvents()
+    {
+        Input::TransitionPressedKeys();
+        Input::TransitionPressedButtons();
+
+        m_Window->ProcessEvents();
+
+        std::scoped_lock<std::mutex> lock(m_EventQueueMutex);
+
+        // Process custom event queue
+        while (m_EventQueue.size() > 0)
+        {
+            auto& func = m_EventQueue.front();
+            func();
+            m_EventQueue.pop();
         }
     }
 
@@ -193,4 +211,5 @@ namespace Engine
     const char* Application::GetConfigurationName() { return ""; }
 
     const char* Application::GetPlatformName() { return ""; }
+
 } // namespace Engine

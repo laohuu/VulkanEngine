@@ -395,7 +395,7 @@ User code may do:
 ```cpp
 // Cast our texture type to ImTextureID / void*
 MyTexture* texture = g_CoffeeTableTexture;
-ImGui::Image((void*)texture, ImVec2(texture->Width, texture->Height));
+ImGui::Image((void*)texture, ImVec2(texture->WindowWidth, texture->WindowHeight));
 ```
 The renderer function called after ImGui::Render() will receive that same value that the user code passed:
 ```cpp

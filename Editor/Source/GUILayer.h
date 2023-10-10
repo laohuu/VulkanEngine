@@ -13,6 +13,8 @@ namespace Engine
 
         void OnUpdate(Timestep ts) override;
         void OnImGuiRender() override;
+    private:
+        float m_frame = 0.0f;
     };
 } // namespace Engine
 

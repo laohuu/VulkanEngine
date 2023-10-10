@@ -7,7 +7,7 @@
 
 namespace Engine
 {
-//    class VulkanSwapChain;
+    //    class VulkanSwapChain;
 
     struct WindowSpecification
     {
@@ -48,10 +48,12 @@ namespace Engine
         virtual const std::string& GetTitle() const                   = 0;
         virtual void               SetTitle(const std::string& title) = 0;
 
+        virtual float GetTime() const = 0;
+
         virtual void* GetNativeWindow() const = 0;
 
         virtual Ref<RendererContext> GetRenderContext() = 0;
-//        virtual VulkanSwapChain&     GetSwapChain()     = 0;
+        //        virtual VulkanSwapChain&     GetSwapChain()     = 0;
 
         static Window* Create(const WindowSpecification& specification = WindowSpecification());
     };

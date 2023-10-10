@@ -292,6 +292,8 @@ namespace Engine
         glfwSetWindowTitle(m_Window, m_Data.Title.c_str());
     }
 
+    float WindowsWindow::GetTime() const { return (float)glfwGetTime(); }
+
     //    VulkanSwapChain& WindowsWindow::GetSwapChain()
     //    {
     //        return m_SwapChain;

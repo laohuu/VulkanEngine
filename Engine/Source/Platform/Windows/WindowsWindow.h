@@ -37,6 +37,8 @@ namespace Engine
         virtual const std::string& GetTitle() const override { return m_Data.Title; }
         virtual void               SetTitle(const std::string& title) override;
 
+        float GetTime() const override;
+
         inline void* GetNativeWindow() const override { return m_Window; }
 
         virtual Ref<RendererContext> GetRenderContext() override { return m_RendererContext; }
