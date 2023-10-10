@@ -24,8 +24,8 @@ namespace Engine
         m_Window->Init();
         m_Window->SetEventCallback([this](Event& e) { OnEvent(e); });
 
-        //         Init renderer and execute command queue to compile all shaders
-        //        Renderer::Init();
+        //                 Init renderer and execute command queue to compile all shaders
+        Renderer::Init();
 
         if (specification.StartMaximized)
             m_Window->Maximize();
@@ -35,7 +35,7 @@ namespace Engine
 
         if (m_Specification.EnableImGui)
         {
-            m_ImGuiLayer = new ImGuiLayer();
+            m_ImGuiLayer = ImGuiLayer::Create();
             PushOverlay(m_ImGuiLayer);
         }
     }
