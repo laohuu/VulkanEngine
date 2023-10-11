@@ -86,7 +86,7 @@ namespace Engine
 
         Ref<VulkanContext> context = m_RendererContext.As<VulkanContext>();
 
-        //        m_SwapChain.Init(VulkanContext::GetInstance(), context->GetDevice());
+        m_SwapChain.Init(VulkanContext::GetInstance(), context->GetDevice());
         //        m_SwapChain.InitSurface(m_Window);
         //
         //        m_SwapChain.Create(&m_Data.Width, &m_Data.Height, m_Specification.VSync);
@@ -188,12 +188,6 @@ namespace Engine
             data.EventCallback(event);
         });
 
-        //        glfwSetTitlebarHitTestCallback(m_Window, [](GLFWwindow* window, int x, int y, int* hit) {
-        //            auto&                      data = *((WindowData*)glfwGetWindowUserPointer(window));
-        //            WindowTitleBarHitTestEvent event(x, y, *hit);
-        //            data.EventCallback(event);
-        //        });
-
         glfwSetWindowIconifyCallback(m_Window, [](GLFWwindow* window, int iconified) {
             auto&               data = *((WindowData*)glfwGetWindowUserPointer(window));
             WindowMinimizeEvent event((bool)iconified);
@@ -232,11 +226,9 @@ namespace Engine
     void WindowsWindow::Shutdown()
     {
         //        m_SwapChain.Destroy();
-        //        m_RendererContext.As<VulkanContext>()
-        //            ->GetDevice()
-        //            ->Destroy(); // need to destroy the device _before_ windows window destructor destroys the
-        //            renderer context
-        //                         // (because device Destroy() asks for renderer context...)
+        m_RendererContext.As<VulkanContext>()->GetDevice()->Destroy();
+        // need to destroy the device _before_ windows window destructor destroys the renderer context
+        // (because device Destroy() asks for renderer context...)
         glfwTerminate();
         s_GLFWInitialized = false;
     }

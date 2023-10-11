@@ -2,8 +2,8 @@
 #define ENGINE_WINDOWSWINDOW_H
 
 #include "Core/Window.h"
+#include "Platform/Vulkan/VulkanSwapChain.h"
 #include "Renderer/RendererContext.h"
-// #include "Platform/Vulkan/VulkanSwapChain.h"
 
 #include <GLFW/glfw3.h>
 
@@ -63,7 +63,7 @@ namespace Engine
         float      m_LastFrameTime = 0.0f;
 
         Ref<RendererContext> m_RendererContext;
-        //        VulkanSwapChain m_SwapChain;
+        VulkanSwapChain      m_SwapChain;
     };
 } // namespace Engine
 
